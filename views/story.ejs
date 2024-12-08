@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Jaro:opsz@6..72&family=Yatra+One&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=backspace" />
+    <title><%= story.title %></title>
+    <style>
+        body{
+            background-color: black;
+            color: white;
+            font-family: "Yatra One", serif;
+            font-weight: 400;
+            font-style: normal;
+        }
+        pre{
+            width: 95%;
+            height: auto;
+            font-family: "Yatra One", serif;
+            font-weight: 400;
+            font-style: normal;
+            text-wrap: wrap;
+        }
+        a.back-to-home{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: red;
+            color: white;
+            padding: 10px 10px;
+            text-align: center;
+            border-radius: 50%;
+            position: fixed;
+            bottom: 15px;
+            right: 10px;
+
+        }
+        h1{
+            font-size: 20px;
+            color: white;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1><%= story.title %></h1>
+    <div>
+        <pre><%= story.content %></pre>
+    </div>
+    <a href="/" class="back-to-home"><span class="material-symbols-outlined">
+        backspace
+        </span></a>
+</body>
+</html>
