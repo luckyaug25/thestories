@@ -1,89 +1,72 @@
+// app.js
 const express = require('express');
-const mysql = require('mysql');
+const { Pool } = require('pg');
 const bodyParser = require('body-parser');
-
 const app = express();
+
+// Body parser middleware to parse form data
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// Set EJS as the view engine
 app.set('view engine', 'ejs');
+
+// Serve static files (CSS, images, etc.)
 app.use(express.static('public'));
 
-// Database Connection
-const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'Deepak@2002',
-    database: 'story_app'
+// Database Connection - Replace these with your Neon database credentials
+const pool = new Pool({
+    host: 'ep-shiny-flower-a5rb6lvr.us-east-2.aws.neon.tech',
+    user: 'neondb_owner',
+    password: 'Ej1Itmne9KMf',
+    database: 'neondb',
+    port: 5432,
+    ssl: {
+        rejectUnauthorized: false, // Ensures SSL is used
+    },
 });
 
-db.connect(err => {
-    if (err) throw err;
-    console.log('Connected to MySQL Database');
+// Route to display all stories
+app.get('/', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM stories ORDER BY created_at DESC');
+        res.render('home', { stories: result.rows });
+    } catch (err) {
+        console.error(err);
+        res.send('Error retrieving stories.');
+    }
 });
 
-// Routes
-
-// Home Page - Display Stories
-app.get('/', (req, res) => {
-    const query = 'SELECT * FROM stories ORDER BY updated_at DESC'; // Sort by updated_at to get the latest updated story first
-    db.query(query, (err, results) => {
-        if (err) throw err;
-        res.render('home', { stories: results });
-    });
-});
-
-// Story Page - Read Full Story
-app.get('/story/:id', (req, res) => {
+// Route to view a full story
+app.get('/story/:id', async (req, res) => {
     const storyId = req.params.id;
-    const query = 'SELECT * FROM stories WHERE id = ?';
-    db.query(query, [storyId], (err, result) => {
-        if (err) throw err;
-        res.render('story', { story: result[0] });
-    });
+    try {
+        const result = await pool.query('SELECT * FROM stories WHERE id = $1', [storyId]);
+        res.render('story', { story: result.rows[0] });
+    } catch (err) {
+        console.error(err);
+        res.send('Error retrieving the story.');
+    }
 });
 
-// Upload Page - Form to Add Story
+// Route to display the upload form
 app.get('/upload', (req, res) => {
     res.render('upload');
 });
 
-// Post New Story
-app.post('/upload', (req, res) => {
+// Route to handle uploading a new story
+app.post('/upload', async (req, res) => {
     const { title, content } = req.body;
-    const query = 'INSERT INTO stories (title, content) VALUES (?, ?)';
-    db.query(query, [title, content], err => {
-        if (err) throw err;
+    try {
+        await pool.query('INSERT INTO stories (title, content) VALUES ($1, $2)', [title, content]);
         res.redirect('/');
-    });
-});
-
-// Edit Page - Form to Edit Existing Story
-app.get('/story/edit/:id', (req, res) => {
-    const storyId = req.params.id;
-    const query = 'SELECT * FROM stories WHERE id = ?';
-    db.query(query, [storyId], (err, result) => {
-        if (err) throw err;
-        if (result.length > 0) {
-            res.render('edit', { story: result[0] });
-        } else {
-            res.status(404).send('Story not found');
-        }
-    });
-});
-
-// Update Story
-app.post('/story/edit/:id', (req, res) => {
-    const storyId = req.params.id;
-    const { title, content } = req.body;
-    const query = 'UPDATE stories SET title = ?, content = ? WHERE id = ?';
-    db.query(query, [title, content, storyId], err => {
-        if (err) throw err;
-        res.redirect('/'); // After update, redirect to the home page to see the updated story at the top
-    });
+    } catch (err) {
+        console.error(err);
+        res.send('Error uploading the story.');
+    }
 });
 
 
-
-// Start the Server
+// Start the server
 app.listen(3000, () => {
-    console.log('Server started on http://localhost:3000');
+    console.log('Server is running on http://localhost:3000');
 });
