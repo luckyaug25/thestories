@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: MyNodeApp
+    env: node
+    region: oregon # Change to your preferred region
+    branch: main # Replace with your branch name
+    buildCommand: npm install
+    startCommand: node app.js
+    plan: free # Or use a paid plan if needed
+    healthCheckPath: /
